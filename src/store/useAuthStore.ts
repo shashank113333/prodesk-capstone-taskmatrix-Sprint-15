@@ -46,7 +46,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   clearError: () => set({ loginError: null }),
 
-  // STRICT LOGIN Handler with Mandatory Password Verification
+  // STRICT LOGIN Handler with Email, Password AND Registered Role Match
   login: (email: string, password = '', role = 'Developer') => {
     if (typeof window === 'undefined') return false;
 
@@ -66,7 +66,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const cleanEmail = email.trim().toLowerCase();
     const cleanPassword = password.trim();
 
-    // 1. Check if Email exists
+    // 1. Email Check
     const existingUser = registeredList.find(
       (u) => u.email.trim().toLowerCase() === cleanEmail
     );
@@ -81,11 +81,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return false;
     }
 
-    // 2. STRICT PASSWORD VERIFICATION!
+    // 2. Strict Password Check
     const userStoredPassword = existingUser.password || 'password123';
     if (userStoredPassword !== cleanPassword) {
       set({
-        loginError: `Incorrect password entered for "${email}". Please enter the correct password or click Forgot Password.`,
+        loginError: `Incorrect password entered for "${email}". Please enter correct password or click Forgot Password.`,
+        isAuthenticated: false,
+        user: null,
+        token: null,
+      });
+      return false;
+    }
+
+    // 3. STRICT ROLE-BASED ACCESS CONTROL (RBAC) MATCH!
+    if (existingUser.role && existingUser.role !== role) {
+      set({
+        loginError: `Role Authorization Mismatch! Your registered account role is "${existingUser.role}". Please select "${existingUser.role}" to sign in.`,
         isAuthenticated: false,
         user: null,
         token: null,
@@ -97,7 +108,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       uid: existingUser.uid,
       name: existingUser.name,
       email: existingUser.email,
-      role: role || existingUser.role,
+      role: existingUser.role,
     };
 
     const mockToken = `jwt_mock_token_${Date.now()}`;
@@ -115,7 +126,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     return true;
   },
 
-  // REGISTER Handler - Saves user with password
+  // REGISTER Handler
   register: (name: string, email: string, password = '', role: 'Developer' | 'Project Lead' | 'Admin' = 'Developer') => {
     const cleanEmail = email.trim().toLowerCase();
     const cleanPassword = password.trim();

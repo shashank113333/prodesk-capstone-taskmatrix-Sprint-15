@@ -20,6 +20,9 @@ import {
   Users,
   ChevronRight,
   ChevronLeft,
+  Lock,
+  ShieldAlert,
+  ShieldCheck,
 } from "lucide-react";
 
 export default function DashboardPage() {
@@ -46,6 +49,7 @@ export default function DashboardPage() {
 
   // User Accounts Database Modal State
   const [isAccountsModalOpen, setIsAccountsModalOpen] = useState(false);
+  const [rbacAlert, setRbacAlert] = useState<string | null>(null);
 
   // 1. Hydrate Authentication State & Tasks
   useEffect(() => {
@@ -74,6 +78,10 @@ export default function DashboardPage() {
       </div>
     );
   }
+
+  const isAdmin = user?.role === "Admin";
+  const isProjectLead = user?.role === "Project Lead";
+  const isDeveloper = user?.role === "Developer";
 
   // Filter Tasks based on Search & Priority
   const filteredTasks = tasks.filter((task) => {
@@ -105,6 +113,12 @@ export default function DashboardPage() {
   };
 
   const handleOpenDeleteModal = (id: string, title: string) => {
+    // RBAC: Only Admin or Project Lead can delete tasks
+    if (isDeveloper) {
+      setRbacAlert("RBAC Restriction: Task deletion requires Scrum Lead or Admin authorization.");
+      setTimeout(() => setRbacAlert(null), 4000);
+      return;
+    }
     setTaskToDelete({ id, title });
     setIsDeleteModalOpen(true);
   };
@@ -114,6 +128,16 @@ export default function DashboardPage() {
       deleteTask(taskToDelete.id);
       setTaskToDelete(null);
     }
+  };
+
+  const handleOpenAccountsModal = () => {
+    // RBAC: Only Admin can access Registered User Database Directory
+    if (!isAdmin) {
+      setRbacAlert(`Access Restricted: Only System Administrators can access Registered Accounts DB. Your role: "${user?.role}".`);
+      setTimeout(() => setRbacAlert(null), 4000);
+      return;
+    }
+    setIsAccountsModalOpen(true);
   };
 
   // Quick Move Column Handler
@@ -147,7 +171,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* User Profile Badge, Accounts DB & Logout */}
+          {/* User Profile Badge, RBAC Accounts DB & Logout */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-3 bg-slate-800/80 px-3.5 py-1.5 rounded-full border border-slate-700">
               <div className="w-7 h-7 rounded-full bg-blue-500/20 border border-blue-400/40 text-blue-400 flex items-center justify-center font-bold text-xs">
@@ -157,18 +181,30 @@ export default function DashboardPage() {
                 <p className="text-xs font-semibold text-white leading-tight">{user?.name || "Shashank"}</p>
                 <p className="text-[10px] text-slate-400 leading-tight">{user?.email || "developer@prodesk.io"}</p>
               </div>
-              <span className="text-[10px] px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20 font-medium">
+              <span
+                className={`text-[10px] px-2 py-0.5 rounded-md font-semibold border ${
+                  isAdmin
+                    ? "bg-purple-500/10 text-purple-400 border-purple-500/20"
+                    : isProjectLead
+                    ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                    : "bg-blue-500/10 text-blue-400 border-blue-500/20"
+                }`}
+              >
                 {user?.role || "Developer"}
               </span>
             </div>
 
-            {/* Registered User Accounts Directory Button */}
+            {/* Registered User Accounts Directory Button (RBAC Restricted to Admin) */}
             <button
-              onClick={() => setIsAccountsModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 rounded-xl text-xs font-semibold transition"
-              title="View Registered User Accounts Directory"
+              onClick={handleOpenAccountsModal}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition ${
+                isAdmin
+                  ? "bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border-blue-500/20"
+                  : "bg-slate-800/50 text-slate-500 border-slate-800 hover:border-slate-700"
+              }`}
+              title={isAdmin ? "View Registered User Directory" : "Admin Role Authorization Required"}
             >
-              <Users className="w-4 h-4" />
+              {isAdmin ? <Users className="w-4 h-4" /> : <Lock className="w-3.5 h-3.5" />}
               <span className="hidden sm:inline">Accounts DB</span>
             </button>
 
@@ -189,6 +225,14 @@ export default function DashboardPage() {
 
       {/* Main Viewport Content */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+        {/* RBAC Restriction Alert Banner */}
+        {rbacAlert && (
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-center gap-3 text-amber-400 text-xs animate-in fade-in zoom-in duration-200">
+            <ShieldAlert className="w-5 h-5 shrink-0 text-amber-500" />
+            <p className="font-semibold">{rbacAlert}</p>
+          </div>
+        )}
+
         {/* Phase 3 Data Visualization Analytics Section */}
         <TaskAnalyticsChart tasks={tasks} />
 
