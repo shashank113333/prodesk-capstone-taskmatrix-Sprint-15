@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "TaskMatrix — Enterprise Agile Task Management System",
     description: "Enterprise-grade Agile project management dashboard built with Next.js 14.",
-    url: "https://prodesk-taskmatrix-sprint-14.vercel.app",
+    url: "https://prodesk-capstone-taskmatrix-sprint-one.vercel.app",
     siteName: "TaskMatrix",
     locale: "en_US",
     type: "website",
