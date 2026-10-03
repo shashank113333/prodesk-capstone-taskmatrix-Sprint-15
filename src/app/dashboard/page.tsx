@@ -22,7 +22,7 @@ import {
   ChevronLeft,
   Lock,
   ShieldAlert,
-  ShieldCheck,
+  X,
 } from "lucide-react";
 
 export default function DashboardPage() {
@@ -47,9 +47,9 @@ export default function DashboardPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<{ id: string; title: string } | null>(null);
 
-  // User Accounts Database Modal State
+  // User Accounts Database Modal State & Floating Notification State
   const [isAccountsModalOpen, setIsAccountsModalOpen] = useState(false);
-  const [rbacAlert, setRbacAlert] = useState<string | null>(null);
+  const [toastNotice, setToastNotice] = useState<string | null>(null);
 
   // 1. Hydrate Authentication State & Tasks
   useEffect(() => {
@@ -81,7 +81,6 @@ export default function DashboardPage() {
 
   const isAdmin = user?.role === "Admin";
   const isProjectLead = user?.role === "Project Lead";
-  const isDeveloper = user?.role === "Developer";
 
   // Filter Tasks based on Search & Priority
   const filteredTasks = tasks.filter((task) => {
@@ -112,13 +111,8 @@ export default function DashboardPage() {
     setIsModalOpen(true);
   };
 
+  // FULL DELETE ALLOWED FOR ALL ROLES (Sprint 15 CRUD Requirement)
   const handleOpenDeleteModal = (id: string, title: string) => {
-    // RBAC: Only Admin or Project Lead can delete tasks
-    if (isDeveloper) {
-      setRbacAlert("RBAC Restriction: Task deletion requires Scrum Lead or Admin authorization.");
-      setTimeout(() => setRbacAlert(null), 4000);
-      return;
-    }
     setTaskToDelete({ id, title });
     setIsDeleteModalOpen(true);
   };
@@ -131,10 +125,10 @@ export default function DashboardPage() {
   };
 
   const handleOpenAccountsModal = () => {
-    // RBAC: Only Admin can access Registered User Database Directory
+    // Only Admin can open Registered Accounts Database Directory
     if (!isAdmin) {
-      setRbacAlert(`Access Restricted: Only System Administrators can access Registered Accounts DB. Your role: "${user?.role}".`);
-      setTimeout(() => setRbacAlert(null), 4000);
+      setToastNotice(`Admin Authorization Required: Registered Accounts DB is restricted to System Administrators. (Your Role: ${user?.role})`);
+      setTimeout(() => setToastNotice(null), 4000);
       return;
     }
     setIsAccountsModalOpen(true);
@@ -152,7 +146,24 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans relative">
+      {/* Floating Toast Notification (Does NOT Shift Page Layout) */}
+      {toastNotice && (
+        <div className="fixed top-20 right-6 z-50 max-w-sm bg-slate-900 border border-amber-500/40 text-amber-300 p-4 rounded-2xl shadow-2xl flex items-start gap-3 animate-in fade-in slide-in-from-top duration-300 backdrop-blur-md">
+          <ShieldAlert className="w-5 h-5 shrink-0 text-amber-400 mt-0.5" />
+          <div className="flex-1 space-y-1">
+            <p className="text-xs font-bold text-amber-200">Access Control Notice</p>
+            <p className="text-[11px] leading-relaxed text-slate-300">{toastNotice}</p>
+          </div>
+          <button
+            onClick={() => setToastNotice(null)}
+            className="text-slate-400 hover:text-white p-0.5 rounded-lg transition"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Navigation Header */}
       <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -171,7 +182,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* User Profile Badge, RBAC Accounts DB & Logout */}
+          {/* User Profile Badge, Accounts DB & Logout */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-3 bg-slate-800/80 px-3.5 py-1.5 rounded-full border border-slate-700">
               <div className="w-7 h-7 rounded-full bg-blue-500/20 border border-blue-400/40 text-blue-400 flex items-center justify-center font-bold text-xs">
@@ -194,7 +205,7 @@ export default function DashboardPage() {
               </span>
             </div>
 
-            {/* Registered User Accounts Directory Button (RBAC Restricted to Admin) */}
+            {/* Registered User Accounts Directory Button */}
             <button
               onClick={handleOpenAccountsModal}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition ${
@@ -202,7 +213,7 @@ export default function DashboardPage() {
                   ? "bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border-blue-500/20"
                   : "bg-slate-800/50 text-slate-500 border-slate-800 hover:border-slate-700"
               }`}
-              title={isAdmin ? "View Registered User Directory" : "Admin Role Authorization Required"}
+              title={isAdmin ? "View Registered User Directory" : "Admin Authorization Required"}
             >
               {isAdmin ? <Users className="w-4 h-4" /> : <Lock className="w-3.5 h-3.5" />}
               <span className="hidden sm:inline">Accounts DB</span>
@@ -225,14 +236,6 @@ export default function DashboardPage() {
 
       {/* Main Viewport Content */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-        {/* RBAC Restriction Alert Banner */}
-        {rbacAlert && (
-          <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-center gap-3 text-amber-400 text-xs animate-in fade-in zoom-in duration-200">
-            <ShieldAlert className="w-5 h-5 shrink-0 text-amber-500" />
-            <p className="font-semibold">{rbacAlert}</p>
-          </div>
-        )}
-
         {/* Phase 3 Data Visualization Analytics Section */}
         <TaskAnalyticsChart tasks={tasks} />
 
@@ -320,7 +323,7 @@ export default function DashboardPage() {
                             {task.priority} Priority
                           </span>
 
-                          {/* EDIT & DELETE Action Buttons (Phase 2 Requirement) */}
+                          {/* EDIT & DELETE Action Buttons (Full CRUD Enabled for All Roles) */}
                           <div className="flex items-center gap-1 opacity-90 group-hover:opacity-100 transition">
                             <button
                               onClick={() => handleOpenEditModal(task)}
