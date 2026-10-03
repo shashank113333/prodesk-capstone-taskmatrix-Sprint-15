@@ -10,6 +10,9 @@ export interface UserPayload {
 export interface RegisteredUser extends UserPayload {
   password?: string;
   registeredAt?: string;
+  status?: 'active' | 'suspended' | 'banned';
+  suspendedUntil?: string | null; // ISO string date or 'PERMANENT'
+  suspensionReason?: string;
 }
 
 interface AuthState {
@@ -18,12 +21,19 @@ interface AuthState {
   isAuthenticated: boolean;
   loginError: string | null;
   registeredUsers: RegisteredUser[];
+  
   login: (email: string, password: string, role?: 'Developer' | 'Project Lead' | 'Admin') => boolean;
   register: (name: string, email: string, password: string, role?: 'Developer' | 'Project Lead' | 'Admin') => boolean;
   resetPassword: (email: string, newPassword: string) => { success: boolean; error?: string };
   logout: () => void;
   hydrateAuth: () => void;
   clearError: () => void;
+
+  // Admin Master Controls (RBAC User Management)
+  deleteUserAccount: (email: string) => void;
+  suspendUserAccount: (email: string, duration: '1h' | '24h' | '7d' | '30d' | 'permanent', reason?: string) => void;
+  reactivateUserAccount: (email: string) => void;
+  updateUserRole: (email: string, newRole: 'Developer' | 'Project Lead' | 'Admin') => void;
 }
 
 const defaultRegisteredUsers: RegisteredUser[] = [
@@ -34,6 +44,7 @@ const defaultRegisteredUsers: RegisteredUser[] = [
     role: 'Developer',
     password: 'password123',
     registeredAt: '2026-09-28',
+    status: 'active',
   },
 ];
 
@@ -46,7 +57,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   clearError: () => set({ loginError: null }),
 
-  // LOGIN Handler with Email, Password & Role Validation
+  // STRICT LOGIN Handler with Suspension & Restriction Check
   login: (email: string, password = '', role = 'Developer') => {
     if (typeof window === 'undefined') return false;
 
@@ -73,7 +84,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     if (!existingUser) {
       set({
-        loginError: `No account found for "${email}". Please register an account first!`,
+        loginError: `No registered account found for "${email}". Please create an account first!`,
         isAuthenticated: false,
         user: null,
         token: null,
@@ -85,7 +96,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const userStoredPassword = existingUser.password || 'password123';
     if (userStoredPassword !== cleanPassword) {
       set({
-        loginError: `Incorrect password entered for "${email}". Please try again or click Forgot Password.`,
+        loginError: `Incorrect password entered for "${email}". Please enter correct password or click Forgot Password.`,
         isAuthenticated: false,
         user: null,
         token: null,
@@ -102,6 +113,35 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         token: null,
       });
       return false;
+    }
+
+    // 4. ADMIN USER SUSPENSION / BAN CHECK!
+    if (existingUser.status === 'suspended' || existingUser.status === 'banned') {
+      if (existingUser.suspendedUntil === 'PERMANENT') {
+        set({
+          loginError: `Access Denied: Account "${email}" has been Permanently Banned by System Admin.`,
+          isAuthenticated: false,
+          user: null,
+          token: null,
+        });
+        return false;
+      } else if (existingUser.suspendedUntil) {
+        const expiryDate = new Date(existingUser.suspendedUntil);
+        if (expiryDate > new Date()) {
+          set({
+            loginError: `Account Suspended! Your access is restricted until ${expiryDate.toLocaleString()}. Reason: ${existingUser.suspensionReason || 'Admin Policy Enforcement'}.`,
+            isAuthenticated: false,
+            user: null,
+            token: null,
+          });
+          return false;
+        } else {
+          // Suspension Expired - Auto Reactivate
+          existingUser.status = 'active';
+          existingUser.suspendedUntil = null;
+          localStorage.setItem('taskmatrix_registered_users', JSON.stringify(registeredList));
+        }
+      }
     }
 
     const userPayload: UserPayload = {
@@ -126,7 +166,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     return true;
   },
 
-  // REGISTER Handler with Duplicate Email Check
+  // REGISTER Handler
   register: (name: string, email: string, password = '', role: 'Developer' | 'Project Lead' | 'Admin' = 'Developer') => {
     const cleanEmail = email.trim().toLowerCase();
     const cleanPassword = password.trim();
@@ -144,7 +184,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
     }
 
-    // Duplicate Check
     const existing = registeredList.find((u) => u.email.toLowerCase() === cleanEmail);
     if (existing) {
       set({
@@ -160,6 +199,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       role: role,
       password: cleanPassword,
       registeredAt: new Date().toISOString().split('T')[0],
+      status: 'active',
     };
 
     const updatedList = [newUser, ...registeredList];
@@ -213,6 +253,79 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     set({ registeredUsers: registeredList });
     return { success: true };
+  },
+
+  // ADMIN ACTION: Delete User Account
+  deleteUserAccount: (email: string) => {
+    const list = get().registeredUsers.filter((u) => u.email.toLowerCase() !== email.toLowerCase());
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('taskmatrix_registered_users', JSON.stringify(list));
+    }
+    set({ registeredUsers: list });
+  },
+
+  // ADMIN ACTION: Suspend / Restrict User Account
+  suspendUserAccount: (email: string, duration: '1h' | '24h' | '7d' | '30d' | 'permanent', reason = 'Admin Policy Enforcement') => {
+    const now = Date.now();
+    let until: string | null = 'PERMANENT';
+
+    if (duration === '1h') until = new Date(now + 3600 * 1000).toISOString();
+    else if (duration === '24h') until = new Date(now + 24 * 3600 * 1000).toISOString();
+    else if (duration === '7d') until = new Date(now + 7 * 24 * 3600 * 1000).toISOString();
+    else if (duration === '30d') until = new Date(now + 30 * 24 * 3600 * 1000).toISOString();
+    else until = 'PERMANENT';
+
+    const updated = get().registeredUsers.map((u) => {
+      if (u.email.toLowerCase() === email.toLowerCase()) {
+        return {
+          ...u,
+          status: (duration === 'permanent' ? 'banned' : 'suspended') as RegisteredUser['status'],
+          suspendedUntil: until,
+          suspensionReason: reason,
+        };
+      }
+      return u;
+    });
+
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('taskmatrix_registered_users', JSON.stringify(updated));
+    }
+    set({ registeredUsers: updated });
+  },
+
+  // ADMIN ACTION: Reactivate User Account
+  reactivateUserAccount: (email: string) => {
+    const updated = get().registeredUsers.map((u) => {
+      if (u.email.toLowerCase() === email.toLowerCase()) {
+        return {
+          ...u,
+          status: 'active' as RegisteredUser['status'],
+          suspendedUntil: null,
+          suspensionReason: undefined,
+        };
+      }
+      return u;
+    });
+
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('taskmatrix_registered_users', JSON.stringify(updated));
+    }
+    set({ registeredUsers: updated });
+  },
+
+  // ADMIN ACTION: Update User Role
+  updateUserRole: (email: string, newRole: 'Developer' | 'Project Lead' | 'Admin') => {
+    const updated = get().registeredUsers.map((u) => {
+      if (u.email.toLowerCase() === email.toLowerCase()) {
+        return { ...u, role: newRole };
+      }
+      return u;
+    });
+
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('taskmatrix_registered_users', JSON.stringify(updated));
+    }
+    set({ registeredUsers: updated });
   },
 
   // LOGOUT Handler
