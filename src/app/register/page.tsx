@@ -4,27 +4,30 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuthStore } from "@/store/useAuthStore";
-import { UserPlus, User, Mail, Lock, Shield, ArrowRight } from "lucide-react";
+import { UserPlus, User, Mail, Lock, Shield, ArrowRight, Eye, EyeOff, AlertCircle } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register } = useAuthStore();
+  const { register, loginError, clearError } = useAuthStore();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<"Developer" | "Project Lead" | "Admin">("Developer");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email || !password) return;
+    clearError();
     setLoading(true);
 
     setTimeout(() => {
-      // Correct Parameter Order: name, email, password, role
-      register(name, email, password, role);
+      const success = register(name, email, password, role);
       setLoading(false);
-      router.push("/dashboard");
+      if (success) {
+        router.push("/dashboard");
+      }
     }, 600);
   };
 
@@ -43,6 +46,20 @@ export default function RegisterPage() {
             Register your developer profile with password security
           </p>
         </header>
+
+        {/* Error Alert Box */}
+        {loginError && (
+          <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-start gap-3 text-red-400 text-xs animate-in fade-in zoom-in duration-200">
+            <AlertCircle className="w-5 h-5 shrink-0 text-red-500 mt-0.5" />
+            <div className="space-y-1">
+              <p className="font-semibold text-red-300">Registration Failed</p>
+              <p>{loginError}</p>
+              <Link href="/login" className="inline-block pt-1 font-bold underline text-red-400 hover:text-red-300">
+                Proceed to Sign In →
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Registration Form */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit} aria-label="Registration form">
@@ -63,7 +80,10 @@ export default function RegisterPage() {
                   required
                   autoComplete="name"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => {
+                    clearError();
+                    setName(e.target.value);
+                  }}
                   placeholder="Shashank"
                   className="block w-full pl-10 pr-3 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm transition"
                 />
@@ -86,14 +106,17 @@ export default function RegisterPage() {
                   required
                   autoComplete="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    clearError();
+                    setEmail(e.target.value);
+                  }}
                   placeholder="developer@prodesk.io"
                   className="block w-full pl-10 pr-3 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm transition"
                 />
               </div>
             </div>
 
-            {/* Password */}
+            {/* Password Field with Eye Toggle Icon */}
             <div>
               <label htmlFor="reg-password" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
                 Password
@@ -105,14 +128,25 @@ export default function RegisterPage() {
                 <input
                   id="reg-password"
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
                   autoComplete="new-password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    clearError();
+                    setPassword(e.target.value);
+                  }}
                   placeholder="••••••••••••"
-                  className="block w-full pl-10 pr-3 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm transition"
+                  className="block w-full pl-10 pr-10 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm transition"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-200 transition"
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
               </div>
             </div>
 

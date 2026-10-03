@@ -4,13 +4,14 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuthStore } from "@/store/useAuthStore";
-import { LogIn, Lock, Mail, Shield, ArrowRight, AlertCircle } from "lucide-react";
+import { LogIn, Lock, Mail, Shield, ArrowRight, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
   const { login, isAuthenticated, hydrateAuth, loginError, clearError } = useAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<"Developer" | "Project Lead" | "Admin">("Developer");
   const [loading, setLoading] = useState(false);
 
@@ -31,7 +32,6 @@ export default function LoginPage() {
     setLoading(true);
 
     setTimeout(() => {
-      // Execute Login with strict email and password check
       const success = login(email, password, role);
       setLoading(false);
 
@@ -106,7 +106,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Password Field with Forgot Password Link */}
+            {/* Password Field with Eye Toggle Icon */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label htmlFor="login-password" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
@@ -123,7 +123,7 @@ export default function LoginPage() {
                 <input
                   id="login-password"
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
                   autoComplete="current-password"
                   value={password}
@@ -132,8 +132,16 @@ export default function LoginPage() {
                     setPassword(e.target.value);
                   }}
                   placeholder="••••••••••••"
-                  className="block w-full pl-10 pr-3 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition"
+                  className="block w-full pl-10 pr-10 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-200 transition"
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
               </div>
             </div>
 

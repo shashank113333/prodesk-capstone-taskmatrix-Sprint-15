@@ -19,7 +19,7 @@ interface AuthState {
   loginError: string | null;
   registeredUsers: RegisteredUser[];
   login: (email: string, password: string, role?: 'Developer' | 'Project Lead' | 'Admin') => boolean;
-  register: (name: string, email: string, password: string, role?: 'Developer' | 'Project Lead' | 'Admin') => void;
+  register: (name: string, email: string, password: string, role?: 'Developer' | 'Project Lead' | 'Admin') => boolean;
   resetPassword: (email: string, newPassword: string) => { success: boolean; error?: string };
   logout: () => void;
   hydrateAuth: () => void;
@@ -46,7 +46,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   clearError: () => set({ loginError: null }),
 
-  // STRICT LOGIN Handler with Email, Password AND Registered Role Match
+  // LOGIN Handler with Email, Password & Role Validation
   login: (email: string, password = '', role = 'Developer') => {
     if (typeof window === 'undefined') return false;
 
@@ -66,14 +66,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const cleanEmail = email.trim().toLowerCase();
     const cleanPassword = password.trim();
 
-    // 1. Email Check
+    // 1. Check if Email exists
     const existingUser = registeredList.find(
       (u) => u.email.trim().toLowerCase() === cleanEmail
     );
 
     if (!existingUser) {
       set({
-        loginError: `No registered account found for "${email}". Please create an account first!`,
+        loginError: `No account found for "${email}". Please register an account first!`,
         isAuthenticated: false,
         user: null,
         token: null,
@@ -85,7 +85,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const userStoredPassword = existingUser.password || 'password123';
     if (userStoredPassword !== cleanPassword) {
       set({
-        loginError: `Incorrect password entered for "${email}". Please enter correct password or click Forgot Password.`,
+        loginError: `Incorrect password entered for "${email}". Please try again or click Forgot Password.`,
         isAuthenticated: false,
         user: null,
         token: null,
@@ -93,10 +93,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return false;
     }
 
-    // 3. STRICT ROLE-BASED ACCESS CONTROL (RBAC) MATCH!
+    // 3. Strict Role-Based Check
     if (existingUser.role && existingUser.role !== role) {
       set({
-        loginError: `Role Authorization Mismatch! Your registered account role is "${existingUser.role}". Please select "${existingUser.role}" to sign in.`,
+        loginError: `Role Mismatch! Your account is registered as "${existingUser.role}". Please select "${existingUser.role}" to sign in.`,
         isAuthenticated: false,
         user: null,
         token: null,
@@ -126,10 +126,32 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     return true;
   },
 
-  // REGISTER Handler
+  // REGISTER Handler with Duplicate Email Check
   register: (name: string, email: string, password = '', role: 'Developer' | 'Project Lead' | 'Admin' = 'Developer') => {
     const cleanEmail = email.trim().toLowerCase();
     const cleanPassword = password.trim();
+
+    if (typeof window === 'undefined') return false;
+
+    const savedRegistered = localStorage.getItem('taskmatrix_registered_users');
+    let registeredList: RegisteredUser[] = defaultRegisteredUsers;
+
+    if (savedRegistered) {
+      try {
+        registeredList = JSON.parse(savedRegistered);
+      } catch (err) {
+        registeredList = defaultRegisteredUsers;
+      }
+    }
+
+    // Duplicate Check
+    const existing = registeredList.find((u) => u.email.toLowerCase() === cleanEmail);
+    if (existing) {
+      set({
+        loginError: `An account with email "${cleanEmail}" is already registered. Please Sign In instead!`,
+      });
+      return false;
+    }
 
     const newUser: RegisteredUser = {
       uid: `usr_${Date.now()}`,
@@ -140,41 +162,27 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       registeredAt: new Date().toISOString().split('T')[0],
     };
 
-    if (typeof window !== 'undefined') {
-      const savedRegistered = localStorage.getItem('taskmatrix_registered_users');
-      let registeredList: RegisteredUser[] = defaultRegisteredUsers;
+    const updatedList = [newUser, ...registeredList];
+    localStorage.setItem('taskmatrix_registered_users', JSON.stringify(updatedList));
 
-      if (savedRegistered) {
-        try {
-          registeredList = JSON.parse(savedRegistered);
-        } catch (err) {
-          registeredList = defaultRegisteredUsers;
-        }
-      }
+    const mockToken = `jwt_mock_token_${Date.now()}`;
+    localStorage.setItem('taskmatrix_user', JSON.stringify(newUser));
+    localStorage.setItem('taskmatrix_token', mockToken);
 
-      const updatedList = [
-        newUser,
-        ...registeredList.filter((u) => u.email.toLowerCase() !== cleanEmail),
-      ];
-      localStorage.setItem('taskmatrix_registered_users', JSON.stringify(updatedList));
+    set({
+      user: {
+        uid: newUser.uid,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+      },
+      token: mockToken,
+      isAuthenticated: true,
+      loginError: null,
+      registeredUsers: updatedList,
+    });
 
-      const mockToken = `jwt_mock_token_${Date.now()}`;
-      localStorage.setItem('taskmatrix_user', JSON.stringify(newUser));
-      localStorage.setItem('taskmatrix_token', mockToken);
-
-      set({
-        user: {
-          uid: newUser.uid,
-          name: newUser.name,
-          email: newUser.email,
-          role: newUser.role,
-        },
-        token: mockToken,
-        isAuthenticated: true,
-        loginError: null,
-        registeredUsers: updatedList,
-      });
-    }
+    return true;
   },
 
   // RESET PASSWORD Handler
@@ -197,12 +205,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     );
 
     if (targetIndex === -1) {
-      return { success: false, error: `No registered account found with email "${email}".` };
+      return { success: false, error: `No registered account found for email "${email}".` };
     }
 
     registeredList[targetIndex].password = newPassword.trim();
     localStorage.setItem('taskmatrix_registered_users', JSON.stringify(registeredList));
 
+    set({ registeredUsers: registeredList });
     return { success: true };
   },
 
