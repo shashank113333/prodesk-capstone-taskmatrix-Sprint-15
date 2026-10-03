@@ -6,6 +6,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useTaskStore, Task } from "@/store/useTaskStore";
 import TaskModal from "@/components/TaskModal";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
+import RbacDeleteModal from "@/components/RbacDeleteModal";
 import TaskAnalyticsChart from "@/components/TaskAnalyticsChart";
 import UserAccountsModal from "@/components/UserAccountsModal";
 import {
@@ -47,6 +48,9 @@ export default function DashboardPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<{ id: string; title: string } | null>(null);
 
+  // RBAC Delete Guard Modal State (for Developer Role)
+  const [isRbacDeleteModalOpen, setIsRbacDeleteModalOpen] = useState(false);
+
   // User Accounts Database Modal State & Floating Notification State
   const [isAccountsModalOpen, setIsAccountsModalOpen] = useState(false);
   const [toastNotice, setToastNotice] = useState<string | null>(null);
@@ -81,6 +85,7 @@ export default function DashboardPage() {
 
   const isAdmin = user?.role === "Admin";
   const isProjectLead = user?.role === "Project Lead";
+  const isDeveloper = user?.role === "Developer";
 
   // Filter Tasks based on Search & Priority
   const filteredTasks = tasks.filter((task) => {
@@ -111,8 +116,14 @@ export default function DashboardPage() {
     setIsModalOpen(true);
   };
 
-  // FULL DELETE ALLOWED FOR ALL ROLES (Sprint 15 CRUD Requirement)
+  // RBAC TASK DELETION GUARD
   const handleOpenDeleteModal = (id: string, title: string) => {
+    // If user is a Developer, trigger clean RBAC Pop-up Modal
+    if (isDeveloper) {
+      setIsRbacDeleteModalOpen(true);
+      return;
+    }
+    // If Scrum Lead or Admin, proceed to confirmation modal
     setTaskToDelete({ id, title });
     setIsDeleteModalOpen(true);
   };
@@ -125,7 +136,6 @@ export default function DashboardPage() {
   };
 
   const handleOpenAccountsModal = () => {
-    // Only Admin can open Registered Accounts Database Directory
     if (!isAdmin) {
       setToastNotice(`Admin Authorization Required: Registered Accounts DB is restricted to System Administrators. (Your Role: ${user?.role})`);
       setTimeout(() => setToastNotice(null), 4000);
@@ -147,7 +157,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans relative">
-      {/* Floating Toast Notification (Does NOT Shift Page Layout) */}
+      {/* Floating Toast Notification */}
       {toastNotice && (
         <div className="fixed top-20 right-6 z-50 max-w-sm bg-slate-900 border border-amber-500/40 text-amber-300 p-4 rounded-2xl shadow-2xl flex items-start gap-3 animate-in fade-in slide-in-from-top duration-300 backdrop-blur-md">
           <ShieldAlert className="w-5 h-5 shrink-0 text-amber-400 mt-0.5" />
@@ -323,7 +333,7 @@ export default function DashboardPage() {
                             {task.priority} Priority
                           </span>
 
-                          {/* EDIT & DELETE Action Buttons (Full CRUD Enabled for All Roles) */}
+                          {/* EDIT & DELETE Action Buttons */}
                           <div className="flex items-center gap-1 opacity-90 group-hover:opacity-100 transition">
                             <button
                               onClick={() => handleOpenEditModal(task)}
@@ -398,12 +408,19 @@ export default function DashboardPage() {
         taskToEdit={taskToEdit}
       />
 
-      {/* Task Safety Delete Confirmation Modal */}
+      {/* Task Safety Delete Confirmation Modal (for Project Lead & Admin) */}
       <DeleteConfirmModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
         taskTitle={taskToDelete?.title || ""}
+      />
+
+      {/* RBAC Delete Warning Modal (for Developer Role) */}
+      <RbacDeleteModal
+        isOpen={isRbacDeleteModalOpen}
+        onClose={() => setIsRbacDeleteModalOpen(false)}
+        userRole={user?.role}
       />
 
       {/* User Accounts Database Directory Modal */}
