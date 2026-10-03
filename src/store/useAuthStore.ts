@@ -18,6 +18,7 @@ interface AuthState {
   loginError: string | null;
   login: (email: string, password?: string, role?: 'Developer' | 'Project Lead' | 'Admin') => boolean;
   register: (name: string, email: string, role: 'Developer' | 'Project Lead' | 'Admin', password?: string) => void;
+  resetPassword: (email: string, newPassword?: string) => { success: boolean; error?: string };
   logout: () => void;
   hydrateAuth: () => void;
   clearError: () => void;
@@ -42,7 +43,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   clearError: () => set({ loginError: null }),
 
-  // LOGIN Handler with Registration Verification
+  // STRICT LOGIN Handler with Email & Password Match
   login: (email: string, password = '', role = 'Developer') => {
     if (typeof window === 'undefined') return false;
 
@@ -59,7 +60,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       localStorage.setItem('taskmatrix_registered_users', JSON.stringify(defaultRegisteredUsers));
     }
 
-    // Verify if Email exists in Registered Accounts
+    // 1. Check if Email exists
     const existingUser = registeredList.find(
       (u) => u.email.toLowerCase() === email.trim().toLowerCase()
     );
@@ -67,6 +68,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (!existingUser) {
       set({
         loginError: `No account found for "${email}". Please register an account first!`,
+        isAuthenticated: false,
+      });
+      return false;
+    }
+
+    // 2. STRICT PASSWORD MATCH CHECK!
+    if (existingUser.password && existingUser.password !== password) {
+      set({
+        loginError: `Incorrect password entered for "${email}". Please try again or click Forgot Password.`,
         isAuthenticated: false,
       });
       return false;
@@ -93,7 +103,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     return true;
   },
 
-  // REGISTER Handler - Saves user to Registered Accounts DB
+  // REGISTER Handler
   register: (name: string, email: string, role: 'Developer' | 'Project Lead' | 'Admin', password = '') => {
     const newUser: RegisteredUser = {
       uid: `usr_${Date.now()}`,
@@ -115,7 +125,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
       }
 
-      // Add new registered user
       const updatedList = [
         newUser,
         ...registeredList.filter((u) => u.email.toLowerCase() !== newUser.email),
@@ -138,6 +147,35 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         loginError: null,
       });
     }
+  },
+
+  // RESET PASSWORD Handler
+  resetPassword: (email: string, newPassword = '') => {
+    if (typeof window === 'undefined') return { success: false, error: 'Browser missing' };
+
+    const savedRegistered = localStorage.getItem('taskmatrix_registered_users');
+    let registeredList: RegisteredUser[] = defaultRegisteredUsers;
+
+    if (savedRegistered) {
+      try {
+        registeredList = JSON.parse(savedRegistered);
+      } catch (err) {
+        registeredList = defaultRegisteredUsers;
+      }
+    }
+
+    const targetIndex = registeredList.findIndex(
+      (u) => u.email.toLowerCase() === email.trim().toLowerCase()
+    );
+
+    if (targetIndex === -1) {
+      return { success: false, error: `No registered account found with email "${email}".` };
+    }
+
+    registeredList[targetIndex].password = newPassword;
+    localStorage.setItem('taskmatrix_registered_users', JSON.stringify(registeredList));
+
+    return { success: true };
   },
 
   // LOGOUT Handler

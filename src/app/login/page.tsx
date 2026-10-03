@@ -31,7 +31,6 @@ export default function LoginPage() {
     setLoading(true);
 
     setTimeout(() => {
-      // Execute Login with Verification Check
       const success = login(email, password, role);
       setLoading(false);
 
@@ -57,16 +56,22 @@ export default function LoginPage() {
           </p>
         </header>
 
-        {/* Verification Error Alert Box */}
+        {/* Verification & Password Error Alert Box */}
         {loginError && (
           <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-start gap-3 text-red-400 text-xs animate-in fade-in zoom-in duration-200">
             <AlertCircle className="w-5 h-5 shrink-0 text-red-500 mt-0.5" />
             <div className="space-y-1">
               <p className="font-semibold text-red-300">Authentication Failed</p>
               <p>{loginError}</p>
-              <Link href="/register" className="inline-block pt-1 font-bold underline text-red-400 hover:text-red-300">
-                Click here to Register first →
-              </Link>
+              <div className="flex items-center gap-3 pt-1">
+                <Link href="/register" className="font-bold underline text-red-400 hover:text-red-300">
+                  Register Account →
+                </Link>
+                <span className="text-slate-600">|</span>
+                <Link href="/forgot-password" className="font-bold underline text-blue-400 hover:text-blue-300">
+                  Reset Password →
+                </Link>
+              </div>
             </div>
           </div>
         )}
@@ -100,11 +105,16 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Password Field */}
+            {/* Password Field with Forgot Password Link */}
             <div>
-              <label htmlFor="login-password" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label htmlFor="login-password" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                  Password
+                </label>
+                <Link href="/forgot-password" className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition">
+                  Forgot Password?
+                </Link>
+              </div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                   <Lock className="h-5 w-5" aria-hidden="true" />
