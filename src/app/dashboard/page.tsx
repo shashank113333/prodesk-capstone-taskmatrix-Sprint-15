@@ -7,7 +7,16 @@ import { useTaskStore, Task } from "@/store/useTaskStore";
 import TaskModal from "@/components/TaskModal";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 import RbacDeleteModal from "@/components/RbacDeleteModal";
-import TaskAnalyticsChart from "@/components/TaskAnalyticsChart";
+import dynamic from "next/dynamic";
+
+const TaskAnalyticsChart = dynamic(() => import("@/components/TaskAnalyticsChart"), {
+  ssr: false,
+  loading: () => (
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 h-64 animate-pulse flex items-center justify-center text-slate-500 text-xs">
+      Loading Analytics Engine...
+    </div>
+  ),
+});
 import UserAccountsModal from "@/components/UserAccountsModal";
 import {
   Kanban,
