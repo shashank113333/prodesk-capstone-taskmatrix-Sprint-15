@@ -31,6 +31,7 @@ export default function LoginPage() {
     setLoading(true);
 
     setTimeout(() => {
+      // Execute Login with strict email and password check
       const success = login(email, password, role);
       setLoading(false);
 

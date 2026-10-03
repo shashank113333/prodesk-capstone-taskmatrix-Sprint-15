@@ -9,6 +9,7 @@ export interface UserPayload {
 
 export interface RegisteredUser extends UserPayload {
   password?: string;
+  registeredAt?: string;
 }
 
 interface AuthState {
@@ -16,15 +17,15 @@ interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   loginError: string | null;
-  login: (email: string, password?: string, role?: 'Developer' | 'Project Lead' | 'Admin') => boolean;
-  register: (name: string, email: string, role: 'Developer' | 'Project Lead' | 'Admin', password?: string) => void;
-  resetPassword: (email: string, newPassword?: string) => { success: boolean; error?: string };
+  registeredUsers: RegisteredUser[];
+  login: (email: string, password: string, role?: 'Developer' | 'Project Lead' | 'Admin') => boolean;
+  register: (name: string, email: string, password: string, role?: 'Developer' | 'Project Lead' | 'Admin') => void;
+  resetPassword: (email: string, newPassword: string) => { success: boolean; error?: string };
   logout: () => void;
   hydrateAuth: () => void;
   clearError: () => void;
 }
 
-// Default pre-registered developer profile
 const defaultRegisteredUsers: RegisteredUser[] = [
   {
     uid: 'usr_dev_default',
@@ -32,6 +33,7 @@ const defaultRegisteredUsers: RegisteredUser[] = [
     email: 'developer@prodesk.io',
     role: 'Developer',
     password: 'password123',
+    registeredAt: '2026-09-28',
   },
 ];
 
@@ -40,10 +42,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   token: null,
   isAuthenticated: false,
   loginError: null,
+  registeredUsers: defaultRegisteredUsers,
 
   clearError: () => set({ loginError: null }),
 
-  // STRICT LOGIN Handler with Email & Password Match
+  // STRICT LOGIN Handler with Mandatory Password Verification
   login: (email: string, password = '', role = 'Developer') => {
     if (typeof window === 'undefined') return false;
 
@@ -60,24 +63,32 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       localStorage.setItem('taskmatrix_registered_users', JSON.stringify(defaultRegisteredUsers));
     }
 
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
+
     // 1. Check if Email exists
     const existingUser = registeredList.find(
-      (u) => u.email.toLowerCase() === email.trim().toLowerCase()
+      (u) => u.email.trim().toLowerCase() === cleanEmail
     );
 
     if (!existingUser) {
       set({
-        loginError: `No account found for "${email}". Please register an account first!`,
+        loginError: `No registered account found for "${email}". Please create an account first!`,
         isAuthenticated: false,
+        user: null,
+        token: null,
       });
       return false;
     }
 
-    // 2. STRICT PASSWORD MATCH CHECK!
-    if (existingUser.password && existingUser.password !== password) {
+    // 2. STRICT PASSWORD VERIFICATION!
+    const userStoredPassword = existingUser.password || 'password123';
+    if (userStoredPassword !== cleanPassword) {
       set({
-        loginError: `Incorrect password entered for "${email}". Please try again or click Forgot Password.`,
+        loginError: `Incorrect password entered for "${email}". Please enter the correct password or click Forgot Password.`,
         isAuthenticated: false,
+        user: null,
+        token: null,
       });
       return false;
     }
@@ -98,19 +109,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       token: mockToken,
       isAuthenticated: true,
       loginError: null,
+      registeredUsers: registeredList,
     });
 
     return true;
   },
 
-  // REGISTER Handler
-  register: (name: string, email: string, role: 'Developer' | 'Project Lead' | 'Admin', password = '') => {
+  // REGISTER Handler - Saves user with password
+  register: (name: string, email: string, password = '', role: 'Developer' | 'Project Lead' | 'Admin' = 'Developer') => {
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
+
     const newUser: RegisteredUser = {
       uid: `usr_${Date.now()}`,
       name: name.trim(),
-      email: email.trim().toLowerCase(),
+      email: cleanEmail,
       role: role,
-      password: password,
+      password: cleanPassword,
+      registeredAt: new Date().toISOString().split('T')[0],
     };
 
     if (typeof window !== 'undefined') {
@@ -127,7 +143,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       const updatedList = [
         newUser,
-        ...registeredList.filter((u) => u.email.toLowerCase() !== newUser.email),
+        ...registeredList.filter((u) => u.email.toLowerCase() !== cleanEmail),
       ];
       localStorage.setItem('taskmatrix_registered_users', JSON.stringify(updatedList));
 
@@ -145,6 +161,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         token: mockToken,
         isAuthenticated: true,
         loginError: null,
+        registeredUsers: updatedList,
       });
     }
   },
@@ -172,7 +189,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return { success: false, error: `No registered account found with email "${email}".` };
     }
 
-    registeredList[targetIndex].password = newPassword;
+    registeredList[targetIndex].password = newPassword.trim();
     localStorage.setItem('taskmatrix_registered_users', JSON.stringify(registeredList));
 
     return { success: true };
@@ -197,6 +214,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (typeof window !== 'undefined') {
       const savedUser = localStorage.getItem('taskmatrix_user');
       const savedToken = localStorage.getItem('taskmatrix_token');
+      const savedRegistered = localStorage.getItem('taskmatrix_registered_users');
+
+      let regList = defaultRegisteredUsers;
+      if (savedRegistered) {
+        try {
+          regList = JSON.parse(savedRegistered);
+        } catch (e) {
+          regList = defaultRegisteredUsers;
+        }
+      }
+
       if (savedUser && savedToken) {
         try {
           const parsedUser = JSON.parse(savedUser);
@@ -205,10 +233,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             token: savedToken,
             isAuthenticated: true,
             loginError: null,
+            registeredUsers: regList,
           });
         } catch (err) {
           console.error('Failed to parse user', err);
         }
+      } else {
+        set({ registeredUsers: regList });
       }
     }
   },

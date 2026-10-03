@@ -7,6 +7,7 @@ import { useTaskStore, Task } from "@/store/useTaskStore";
 import TaskModal from "@/components/TaskModal";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 import TaskAnalyticsChart from "@/components/TaskAnalyticsChart";
+import UserAccountsModal from "@/components/UserAccountsModal";
 import {
   Kanban,
   LogOut,
@@ -16,8 +17,7 @@ import {
   Pencil,
   Trash2,
   Calendar,
-  CheckCircle2,
-  ShieldCheck,
+  Users,
   ChevronRight,
   ChevronLeft,
 } from "lucide-react";
@@ -43,6 +43,9 @@ export default function DashboardPage() {
   // Delete Confirmation Modal State
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<{ id: string; title: string } | null>(null);
+
+  // User Accounts Database Modal State
+  const [isAccountsModalOpen, setIsAccountsModalOpen] = useState(false);
 
   // 1. Hydrate Authentication State & Tasks
   useEffect(() => {
@@ -144,8 +147,8 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* User Profile Badge & Logout */}
-          <div className="flex items-center gap-4">
+          {/* User Profile Badge, Accounts DB & Logout */}
+          <div className="flex items-center gap-3">
             <div className="flex items-center gap-3 bg-slate-800/80 px-3.5 py-1.5 rounded-full border border-slate-700">
               <div className="w-7 h-7 rounded-full bg-blue-500/20 border border-blue-400/40 text-blue-400 flex items-center justify-center font-bold text-xs">
                 {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
@@ -158,6 +161,16 @@ export default function DashboardPage() {
                 {user?.role || "Developer"}
               </span>
             </div>
+
+            {/* Registered User Accounts Directory Button */}
+            <button
+              onClick={() => setIsAccountsModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 rounded-xl text-xs font-semibold transition"
+              title="View Registered User Accounts Directory"
+            >
+              <Users className="w-4 h-4" />
+              <span className="hidden sm:inline">Accounts DB</span>
+            </button>
 
             <button
               onClick={() => {
@@ -344,6 +357,12 @@ export default function DashboardPage() {
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
         taskTitle={taskToDelete?.title || ""}
+      />
+
+      {/* User Accounts Database Directory Modal */}
+      <UserAccountsModal
+        isOpen={isAccountsModalOpen}
+        onClose={() => setIsAccountsModalOpen(false)}
       />
     </div>
   );
