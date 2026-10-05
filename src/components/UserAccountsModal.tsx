@@ -146,9 +146,10 @@ export default function UserAccountsModal({ isOpen, onClose }: UserAccountsModal
           {(!registeredUsers || registeredUsers.length === 0) ? (
             <div className="text-center py-10 text-slate-500 text-xs">No registered accounts found</div>
           ) : (
-            registeredUsers.map((userItem) => {
+            registeredUsers.map((userItem, index) => {
               const isUserSuspended = userItem.status === 'suspended' || userItem.status === 'banned';
               const isSelf = currentUser?.email.toLowerCase() === userItem.email.toLowerCase();
+              const isFirstItem = index === 0;
 
               return (
                 <div
@@ -255,7 +256,7 @@ export default function UserAccountsModal({ isOpen, onClose }: UserAccountsModal
                             </button>
 
                             {suspendMenuUserEmail === userItem.email && (
-                              <div className="absolute right-0 bottom-full mb-1 z-20 w-44 bg-slate-900 border border-slate-700 rounded-xl shadow-xl p-1 space-y-0.5 text-[11px]">
+                              <div className={`absolute right-0 ${isFirstItem ? "top-full mt-1" : "bottom-full mb-1"} z-30 w-44 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-1 space-y-0.5 text-[11px]`}>
                                 <div className="px-2 py-1 text-[10px] font-bold text-slate-400 border-b border-slate-800">
                                   Select Suspension:
                                 </div>

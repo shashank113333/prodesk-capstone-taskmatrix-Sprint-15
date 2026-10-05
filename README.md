@@ -25,7 +25,6 @@ Below are the pre-seeded credentials for evaluators and reviewers to test all RB
 | :--- | :--- | :--- | :--- | :--- |
 | **System Administrator** | Master System Admin | `shashankv@gmail.com` | `1234` | **Full Admin Control**: All BaaS CRUD, Task Deletions, Recharts Analytics, Accounts DB Directory, Timed Account Suspensions (1h/24h/7d/30d/Perm), Role Editor |
 
----
 
 ## 🏗️ Technical Architecture & Tech Stack
 
