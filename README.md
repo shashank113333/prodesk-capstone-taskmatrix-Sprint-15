@@ -11,9 +11,20 @@ Sprint 15 delivers the **Feature Complete** CRUD architecture and dynamic data v
 ---
 
 ## 🌐 Live Application & Links
-- 🚀 **Live Website (Vercel)**: [https://prodesk-taskmatrix-sprint-15.vercel.app](https://prodesk-taskmatrix-sprint-15.vercel.app)
+- 🚀 **Live Website (Vercel)**: [https://prodesk-capstone-taskmatrix-sprint-one.vercel.app](https://prodesk-capstone-taskmatrix-sprint-one.vercel.app)
 - 📦 **GitHub Repository**: [https://github.com/shashank113333/prodesk-capstone-taskmatrix-Sprint-15](https://github.com/shashank113333/prodesk-capstone-taskmatrix-Sprint-15)
 - 📝 **AI Compliance Log**: Refer to `Prompts.md` for architectural decision logs.
+
+---
+
+## 🔑 Evaluator & System Administrator Credentials
+
+Below are the pre-seeded credentials for evaluators and reviewers to test all RBAC roles, CRUD operations, and Admin User Accounts Management:
+
+| Role Name | Agile Designation | Email Address | Default Password | Permissions / Capabilities |
+| :--- | :--- | :--- | :--- | :--- |
+| **System Administrator** | Master System Admin | `shashankv@gmail.com` | `1234` | **Full Admin Control**: All BaaS CRUD, Task Deletions, Recharts Analytics, Accounts DB Directory, Timed Account Suspensions (1h/24h/7d/30d/Perm), Role Editor |
+| **Frontend Specialist** | Individual Contributor | `developer@prodesk.io` | `password123` | **Developer Access**: Create Tasks, Read Backlog, Edit Tasks, Update Status (To Do ➔ Done). *Delete & Accounts DB restricted* |
 
 ---
 

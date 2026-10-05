@@ -163,42 +163,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div className="bg-slate-950/80 border border-slate-800/80 rounded-xl p-3 space-y-2">
-            <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1.5">
-              <Lock className="w-3 h-3 text-blue-400" /> Click Quick Demo Accounts to Auto-fill:
-            </p>
-            <div className="grid grid-cols-2 gap-2 text-[10px]">
-              <button
-                type="button"
-                onClick={() => {
-                  clearError();
-                  setEmail("developer@prodesk.io");
-                  setPassword("password123");
-                  setRole("Developer");
-                }}
-                className="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg text-left transition"
-              >
-                <p className="font-bold text-blue-400">Developer Account</p>
-                <p className="text-slate-400 truncate">developer@prodesk.io</p>
-                <p className="text-slate-500 font-mono">pass: password123</p>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  clearError();
-                  setEmail("shashankv@gmail.com");
-                  setPassword("1234");
-                  setRole("Admin");
-                }}
-                className="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg text-left transition"
-              >
-                <p className="font-bold text-purple-400">System Admin Account</p>
-                <p className="text-slate-400 truncate">shashankv@gmail.com</p>
-                <p className="text-slate-500 font-mono">pass: 1234</p>
-              </button>
-            </div>
-          </div>
-
           <button
             type="submit"
             disabled={loading}
