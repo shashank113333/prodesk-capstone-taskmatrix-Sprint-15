@@ -16,7 +16,6 @@ interface TaskState {
   searchQuery: string;
   priorityFilter: string;
   
-  // Actions (CRUD)
   addTask: (task: Omit<Task, 'id' | 'createdAt'>) => void;
   updateTask: (id: string, updatedFields: Partial<Task>) => void;
   deleteTask: (id: string) => void;
@@ -25,7 +24,6 @@ interface TaskState {
   setPriorityFilter: (priority: string) => void;
 }
 
-// Default Seed Tasks for initial demonstration
 const initialDefaultTasks: Task[] = [
   {
     id: 'tsk_101',
@@ -74,7 +72,6 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   searchQuery: '',
   priorityFilter: 'ALL',
 
-  // READ / HYDRATE Tasks from localStorage
   hydrateTasks: (userEmail: string) => {
     if (typeof window === 'undefined') return;
 
@@ -88,7 +85,6 @@ export const useTaskStore = create<TaskState>((set, get) => ({
         set({ tasks: initialDefaultTasks });
       }
     } else {
-      // Seed default tasks if empty
       const seeded = initialDefaultTasks.map((t) => ({
         ...t,
         userEmail: userEmail || t.userEmail,
@@ -98,7 +94,6 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     }
   },
 
-  // CREATE Task
   addTask: (newTaskData) => {
     const newTask: Task = {
       ...newTaskData,
@@ -113,7 +108,6 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     set({ tasks: updated });
   },
 
-  // UPDATE Task
   updateTask: (id, updatedFields) => {
     const updated = get().tasks.map((task) =>
       task.id === id ? { ...task, ...updatedFields } : task
@@ -124,7 +118,6 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     set({ tasks: updated });
   },
 
-  // DELETE Task
   deleteTask: (id) => {
     const updated = get().tasks.filter((task) => task.id !== id);
     if (typeof window !== 'undefined') {
@@ -133,7 +126,6 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     set({ tasks: updated });
   },
 
-  // Search & Filters
   setSearchQuery: (query) => set({ searchQuery: query }),
   setPriorityFilter: (priority) => set({ priorityFilter: priority }),
 }));

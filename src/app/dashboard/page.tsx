@@ -52,19 +52,12 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
-
-  // Delete Confirmation Modal State
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<{ id: string; title: string } | null>(null);
-
-  // RBAC Delete Guard Modal State (for Developer Role)
   const [isRbacDeleteModalOpen, setIsRbacDeleteModalOpen] = useState(false);
-
-  // User Accounts Database Modal State & Floating Notification State
   const [isAccountsModalOpen, setIsAccountsModalOpen] = useState(false);
   const [toastNotice, setToastNotice] = useState<string | null>(null);
 
-  // 1. Hydrate Authentication State & Tasks
   useEffect(() => {
     hydrateAuth();
     setLoading(false);
@@ -76,7 +69,6 @@ export default function DashboardPage() {
     }
   }, [user, hydrateTasks]);
 
-  // 2. ROUTE GUARD: Intercept unauthenticated access
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       router.push("/login");
@@ -96,7 +88,6 @@ export default function DashboardPage() {
   const isProjectLead = user?.role === "Project Lead";
   const isDeveloper = user?.role === "Developer";
 
-  // Filter Tasks based on Search & Priority
   const filteredTasks = tasks.filter((task) => {
     const matchesSearch =
       task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -125,14 +116,11 @@ export default function DashboardPage() {
     setIsModalOpen(true);
   };
 
-  // RBAC TASK DELETION GUARD
   const handleOpenDeleteModal = (id: string, title: string) => {
-    // If user is a Developer, trigger clean RBAC Pop-up Modal
     if (isDeveloper) {
       setIsRbacDeleteModalOpen(true);
       return;
     }
-    // If Scrum Lead or Admin, proceed to confirmation modal
     setTaskToDelete({ id, title });
     setIsDeleteModalOpen(true);
   };
@@ -153,7 +141,6 @@ export default function DashboardPage() {
     setIsAccountsModalOpen(true);
   };
 
-  // Quick Move Column Handler
   const moveTaskStatus = (task: Task, direction: "next" | "prev") => {
     const statusOrder: Task["status"][] = ["todo", "in_progress", "in_review", "done"];
     const currentIndex = statusOrder.indexOf(task.status);
@@ -166,7 +153,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans relative">
-      {/* Floating Toast Notification */}
       {toastNotice && (
         <div className="fixed top-20 right-6 z-50 max-w-sm bg-slate-900 border border-amber-500/40 text-amber-300 p-4 rounded-2xl shadow-2xl flex items-start gap-3 animate-in fade-in slide-in-from-top duration-300 backdrop-blur-md">
           <ShieldAlert className="w-5 h-5 shrink-0 text-amber-400 mt-0.5" />
@@ -183,10 +169,8 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Navigation Header */}
       <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          {/* Logo & Title */}
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-600/30">
               <Kanban className="w-5 h-5" />
@@ -201,7 +185,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* User Profile Badge, Accounts DB & Logout */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-3 bg-slate-800/80 px-3.5 py-1.5 rounded-full border border-slate-700">
               <div className="w-7 h-7 rounded-full bg-blue-500/20 border border-blue-400/40 text-blue-400 flex items-center justify-center font-bold text-xs">
@@ -224,7 +207,6 @@ export default function DashboardPage() {
               </span>
             </div>
 
-            {/* Registered User Accounts Directory Button */}
             <button
               onClick={handleOpenAccountsModal}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition ${
@@ -253,15 +235,11 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      {/* Main Viewport Content */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-        {/* Phase 3 Data Visualization Analytics Section */}
         <TaskAnalyticsChart tasks={tasks} />
 
-        {/* Toolbar: Search, Priority Filter, and Create Button */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900/40 p-4 rounded-2xl border border-slate-800">
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto flex-1">
-            {/* Search Input */}
             <div className="relative w-full sm:w-80">
               <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
               <input
@@ -273,7 +251,6 @@ export default function DashboardPage() {
               />
             </div>
 
-            {/* Priority Filter */}
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <Filter className="w-3.5 h-3.5 text-slate-400 hidden sm:block" />
               <select
@@ -289,7 +266,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* CREATE Action Button (Phase 1 Requirement) */}
           <button
             onClick={handleOpenCreateModal}
             className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-blue-600/20 transition"
@@ -299,14 +275,12 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        {/* 4-Column Agile Kanban Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {columns.map((col) => {
             const colTasks = filteredTasks.filter((t) => t.status === col.id);
 
             return (
               <div key={col.id} className={`rounded-2xl border p-4 flex flex-col gap-4 ${col.color}`}>
-                {/* Column Header */}
                 <div className="flex items-center justify-between pb-2 border-b border-slate-800/80">
                   <span className="font-semibold text-xs text-slate-200 tracking-wide uppercase">
                     {col.title}
@@ -316,7 +290,6 @@ export default function DashboardPage() {
                   </span>
                 </div>
 
-                {/* Task Cards List */}
                 <div className="space-y-3 flex-1 min-h-[120px]">
                   {colTasks.length === 0 ? (
                     <div className="h-24 border border-dashed border-slate-800/60 rounded-xl flex items-center justify-center text-[11px] text-slate-500 italic">
@@ -328,7 +301,6 @@ export default function DashboardPage() {
                         key={task.id}
                         className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-3 hover:border-slate-700 transition shadow-md group relative"
                       >
-                        {/* Priority Badge & Action Buttons */}
                         <div className="flex items-center justify-between">
                           <span
                             className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${
@@ -342,7 +314,6 @@ export default function DashboardPage() {
                             {task.priority} Priority
                           </span>
 
-                          {/* EDIT & DELETE Action Buttons */}
                           <div className="flex items-center gap-1 opacity-90 group-hover:opacity-100 transition">
                             <button
                               onClick={() => handleOpenEditModal(task)}
@@ -361,7 +332,6 @@ export default function DashboardPage() {
                           </div>
                         </div>
 
-                        {/* Title & Description */}
                         <div>
                           <h3 className="text-xs font-bold text-slate-100 leading-snug">{task.title}</h3>
                           {task.description && (
@@ -371,14 +341,12 @@ export default function DashboardPage() {
                           )}
                         </div>
 
-                        {/* Due Date & Quick Navigation Controls */}
                         <div className="flex items-center justify-between pt-2 border-t border-slate-800/60 text-[10px] text-slate-400">
                           <div className="flex items-center gap-1">
                             <Calendar className="w-3 h-3 text-slate-500" />
                             <span>{task.dueDate || "No due date"}</span>
                           </div>
 
-                          {/* Status Shift Buttons */}
                           <div className="flex items-center gap-1">
                             {task.status !== "todo" && (
                               <button
@@ -410,14 +378,12 @@ export default function DashboardPage() {
         </div>
       </main>
 
-      {/* Task Create/Edit Modal */}
       <TaskModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         taskToEdit={taskToEdit}
       />
 
-      {/* Task Safety Delete Confirmation Modal (for Project Lead & Admin) */}
       <DeleteConfirmModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
@@ -425,14 +391,12 @@ export default function DashboardPage() {
         taskTitle={taskToDelete?.title || ""}
       />
 
-      {/* RBAC Delete Warning Modal (for Developer Role) */}
       <RbacDeleteModal
         isOpen={isRbacDeleteModalOpen}
         onClose={() => setIsRbacDeleteModalOpen(false)}
         userRole={user?.role}
       />
 
-      {/* User Accounts Database Directory Modal */}
       <UserAccountsModal
         isOpen={isAccountsModalOpen}
         onClose={() => setIsAccountsModalOpen(false)}

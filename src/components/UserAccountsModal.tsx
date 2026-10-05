@@ -89,7 +89,6 @@ export default function UserAccountsModal({ isOpen, onClose }: UserAccountsModal
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
       <div className="bg-slate-900 border border-slate-800 w-full max-w-3xl rounded-2xl shadow-2xl p-6 space-y-5 relative animate-in fade-in zoom-in duration-200">
-        {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-800 pb-4">
           <div className="flex items-center gap-3">
             <div className="p-2.5 bg-blue-600/10 text-blue-500 rounded-xl border border-blue-500/20">
@@ -117,7 +116,6 @@ export default function UserAccountsModal({ isOpen, onClose }: UserAccountsModal
           </button>
         </div>
 
-        {/* Action Notice Alert */}
         {actionNotice && (
           <div className="p-3 bg-blue-500/10 border border-blue-500/20 text-blue-300 rounded-xl text-xs flex items-center justify-between animate-in fade-in duration-150">
             <span className="flex items-center gap-2">
@@ -130,7 +128,6 @@ export default function UserAccountsModal({ isOpen, onClose }: UserAccountsModal
           </div>
         )}
 
-        {/* User Table List */}
         <div className="max-h-[380px] overflow-y-auto space-y-3 pr-1">
           {(!registeredUsers || registeredUsers.length === 0) ? (
             <div className="text-center py-10 text-slate-500 text-xs">No registered accounts found</div>
@@ -149,7 +146,6 @@ export default function UserAccountsModal({ isOpen, onClose }: UserAccountsModal
                   } flex flex-col gap-3`}
                 >
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                    {/* User info */}
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 border ${
                         isUserSuspended
@@ -167,7 +163,6 @@ export default function UserAccountsModal({ isOpen, onClose }: UserAccountsModal
                             </span>
                           )}
                           
-                          {/* Role selector or badge */}
                           {isAdmin && !isSelf ? (
                             <select
                               value={userItem.role}
@@ -184,7 +179,6 @@ export default function UserAccountsModal({ isOpen, onClose }: UserAccountsModal
                             </span>
                           )}
 
-                          {/* Account Status Badge */}
                           {userItem.status === 'banned' ? (
                             <span className="text-[9px] bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded font-bold uppercase tracking-wider flex items-center gap-1">
                               <UserX className="w-2.5 h-2.5" /> Permanently Banned
@@ -206,7 +200,6 @@ export default function UserAccountsModal({ isOpen, onClose }: UserAccountsModal
                       </div>
                     </div>
 
-                    {/* UID and Protection */}
                     <div className="flex items-center gap-3 text-[10px] text-slate-400 justify-between w-full sm:w-auto">
                       <span className="bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800 font-mono">
                         UID: {userItem.uid.slice(0, 14)}
@@ -218,7 +211,6 @@ export default function UserAccountsModal({ isOpen, onClose }: UserAccountsModal
                     </div>
                   </div>
 
-                  {/* ADMIN ACTION CONTROLS */}
                   {isAdmin && (
                     <div className="pt-2.5 mt-1 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2">
                       <div className="text-[10px] text-slate-400">
@@ -230,7 +222,6 @@ export default function UserAccountsModal({ isOpen, onClose }: UserAccountsModal
                       </div>
 
                       <div className="flex items-center gap-2 ml-auto">
-                        {/* Reactivate Button if suspended */}
                         {isUserSuspended && (
                           <button
                             onClick={() => handleReactivate(userItem.email)}
@@ -240,7 +231,6 @@ export default function UserAccountsModal({ isOpen, onClose }: UserAccountsModal
                           </button>
                         )}
 
-                        {/* Suspend Menu Button */}
                         {!isSelf && (
                           <div className="relative">
                             <button
@@ -290,7 +280,6 @@ export default function UserAccountsModal({ isOpen, onClose }: UserAccountsModal
                           </div>
                         )}
 
-                        {/* Delete Account Button */}
                         {!isSelf && (
                           confirmDeleteEmail === userItem.email ? (
                             <div className="flex items-center gap-1 animate-in fade-in duration-100">
@@ -326,7 +315,6 @@ export default function UserAccountsModal({ isOpen, onClose }: UserAccountsModal
           )}
         </div>
 
-        {/* Footer */}
         <div className="pt-3 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
           <div>
             {isAdmin ? (

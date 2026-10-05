@@ -44,7 +44,6 @@ export default function TaskModal({ isOpen, onClose, taskToEdit }: TaskModalProp
     if (!title.trim()) return;
 
     if (taskToEdit) {
-      // UPDATE Task (Phase 2 Requirement)
       updateTask(taskToEdit.id, {
         title,
         description,
@@ -53,7 +52,6 @@ export default function TaskModal({ isOpen, onClose, taskToEdit }: TaskModalProp
         dueDate,
       });
     } else {
-      // CREATE Task (Phase 1 Requirement)
       addTask({
         title,
         description,
@@ -70,7 +68,6 @@ export default function TaskModal({ isOpen, onClose, taskToEdit }: TaskModalProp
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
       <div className="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl shadow-2xl p-6 space-y-6 relative animate-in fade-in zoom-in duration-200">
-        {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-800 pb-4">
           <div className="flex items-center gap-2">
             <div className="p-2 bg-blue-600/10 text-blue-500 rounded-xl">
@@ -88,9 +85,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit }: TaskModalProp
           </button>
         </div>
 
-        {/* Form Body */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Title */}
           <div>
             <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
               Task Title *
@@ -105,7 +100,6 @@ export default function TaskModal({ isOpen, onClose, taskToEdit }: TaskModalProp
             />
           </div>
 
-          {/* Description */}
           <div>
             <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
               Description
@@ -119,9 +113,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit }: TaskModalProp
             />
           </div>
 
-          {/* Status & Priority Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Status Selector */}
             <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
                 Column Status
@@ -138,7 +130,6 @@ export default function TaskModal({ isOpen, onClose, taskToEdit }: TaskModalProp
               </select>
             </div>
 
-            {/* Priority Selector */}
             <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
                 Priority Level
@@ -155,7 +146,6 @@ export default function TaskModal({ isOpen, onClose, taskToEdit }: TaskModalProp
             </div>
           </div>
 
-          {/* Due Date */}
           <div>
             <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
               Target Due Date
@@ -168,7 +158,6 @@ export default function TaskModal({ isOpen, onClose, taskToEdit }: TaskModalProp
             />
           </div>
 
-          {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
             <button
               type="button"

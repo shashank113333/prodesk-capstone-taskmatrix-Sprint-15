@@ -34,7 +34,6 @@ export default function RegisterPage() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-slate-950 px-4 py-12">
       <section className="max-w-md w-full space-y-8 bg-slate-900/80 p-8 rounded-2xl border border-slate-800 shadow-2xl backdrop-blur-sm">
-        {/* Header */}
         <header className="text-center space-y-2">
           <div className="inline-flex items-center justify-center p-3 bg-emerald-600/10 text-emerald-500 rounded-xl mb-2 border border-emerald-500/20">
             <UserPlus className="w-8 h-8" aria-hidden="true" />
@@ -47,7 +46,6 @@ export default function RegisterPage() {
           </p>
         </header>
 
-        {/* Error Alert Box */}
         {loginError && (
           <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-start gap-3 text-red-400 text-xs animate-in fade-in zoom-in duration-200">
             <AlertCircle className="w-5 h-5 shrink-0 text-red-500 mt-0.5" />
@@ -61,10 +59,8 @@ export default function RegisterPage() {
           </div>
         )}
 
-        {/* Registration Form */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit} aria-label="Registration form">
           <div className="space-y-4">
-            {/* Full Name */}
             <div>
               <label htmlFor="reg-name" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
                 Full Name
@@ -90,7 +86,6 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Email Address */}
             <div>
               <label htmlFor="reg-email" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
                 Work Email Address
@@ -116,7 +111,6 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Password Field with Eye Toggle Icon */}
             <div>
               <label htmlFor="reg-password" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
                 Password
@@ -150,7 +144,6 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Role Selection */}
             <div>
               <label htmlFor="reg-role" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
                 Select Your Role
@@ -174,7 +167,6 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
@@ -186,7 +178,6 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        {/* Footer Navigation */}
         <footer className="text-center pt-2 border-t border-slate-800/80">
           <p className="text-sm text-slate-400">
             Already have an account?{" "}

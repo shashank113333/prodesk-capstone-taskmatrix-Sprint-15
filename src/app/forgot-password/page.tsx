@@ -43,7 +43,6 @@ export default function ForgotPasswordPage() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-slate-950 px-4 py-12">
       <section className="max-w-md w-full space-y-8 bg-slate-900/80 p-8 rounded-2xl border border-slate-800 shadow-2xl backdrop-blur-sm">
-        {/* Header */}
         <header className="text-center space-y-2">
           <div className="inline-flex items-center justify-center p-3 bg-amber-600/10 text-amber-500 rounded-xl mb-2 border border-amber-500/20">
             <KeyRound className="w-8 h-8" aria-hidden="true" />
@@ -56,7 +55,6 @@ export default function ForgotPasswordPage() {
           </p>
         </header>
 
-        {/* Success / Error Notification */}
         {message && (
           <div
             className={`p-4 rounded-xl border flex items-start gap-3 text-xs animate-in fade-in zoom-in duration-200 ${
@@ -82,10 +80,8 @@ export default function ForgotPasswordPage() {
           </div>
         )}
 
-        {/* Reset Form */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit} aria-label="Reset Password Form">
           <div className="space-y-4">
-            {/* Email Address */}
             <div>
               <label htmlFor="reset-email" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
                 Registered Work Email
@@ -107,7 +103,6 @@ export default function ForgotPasswordPage() {
               </div>
             </div>
 
-            {/* New Password with Eye Icon */}
             <div>
               <label htmlFor="reset-new-password" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
                 New Password
@@ -137,7 +132,6 @@ export default function ForgotPasswordPage() {
               </div>
             </div>
 
-            {/* Confirm New Password with Eye Icon */}
             <div>
               <label htmlFor="reset-confirm-password" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
                 Confirm New Password
@@ -168,7 +162,6 @@ export default function ForgotPasswordPage() {
             </div>
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
@@ -180,7 +173,6 @@ export default function ForgotPasswordPage() {
           </button>
         </form>
 
-        {/* Footer Navigation */}
         <footer className="text-center pt-2 border-t border-slate-800/80">
           <p className="text-sm text-slate-400">
             Remembered your password?{" "}

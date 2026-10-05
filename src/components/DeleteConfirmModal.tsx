@@ -21,7 +21,6 @@ export default function DeleteConfirmModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
       <div className="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-6 relative animate-in fade-in zoom-in duration-200">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-red-500/10 text-red-500 rounded-xl border border-red-500/20">
@@ -40,7 +39,6 @@ export default function DeleteConfirmModal({
           </button>
         </div>
 
-        {/* Description */}
         <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
           <p className="text-xs text-slate-300 leading-relaxed">
             Are you sure you want to permanently delete this task entity from the state database?
@@ -50,7 +48,6 @@ export default function DeleteConfirmModal({
           </p>
         </div>
 
-        {/* Actions */}
         <div className="flex items-center justify-end gap-3 pt-2">
           <button
             onClick={onClose}

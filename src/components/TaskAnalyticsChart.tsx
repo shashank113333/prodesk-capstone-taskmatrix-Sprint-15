@@ -20,7 +20,6 @@ interface TaskAnalyticsChartProps {
 }
 
 export default function TaskAnalyticsChart({ tasks }: TaskAnalyticsChartProps) {
-  // 1. Data Aggregation using .reduce() (Phase 3 Requirement)
   const statusCounts = tasks.reduce(
     (acc, task) => {
       acc[task.status] = (acc[task.status] || 0) + 1;
@@ -37,7 +36,6 @@ export default function TaskAnalyticsChart({ tasks }: TaskAnalyticsChartProps) {
     { High: 0, Medium: 0, Low: 0 } as Record<string, number>
   );
 
-  // Chart Data Payload
   const statusData = [
     { name: "To Do", count: statusCounts.todo, color: "#64748b" },
     { name: "In Progress", count: statusCounts.in_progress, color: "#3b82f6" },
@@ -57,7 +55,6 @@ export default function TaskAnalyticsChart({ tasks }: TaskAnalyticsChartProps) {
 
   return (
     <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-6 backdrop-blur-md">
-      {/* Chart Section Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-blue-600/10 text-blue-500 rounded-xl border border-blue-500/20">
@@ -69,7 +66,6 @@ export default function TaskAnalyticsChart({ tasks }: TaskAnalyticsChartProps) {
           </div>
         </div>
 
-        {/* Completion Rate Pill */}
         <div className="flex items-center gap-2 bg-slate-800/80 px-3.5 py-1.5 rounded-full border border-slate-700 text-xs font-semibold">
           <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           <span className="text-slate-300">Completion Velocity:</span>
@@ -77,9 +73,7 @@ export default function TaskAnalyticsChart({ tasks }: TaskAnalyticsChartProps) {
         </div>
       </div>
 
-      {/* Analytics Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Bar Chart: Tasks by Column Status */}
         <div className="lg:col-span-2 bg-slate-950/80 p-4 rounded-xl border border-slate-800/80 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
@@ -106,7 +100,6 @@ export default function TaskAnalyticsChart({ tasks }: TaskAnalyticsChartProps) {
           </div>
         </div>
 
-        {/* Priority Metrics Summary */}
         <div className="bg-slate-950/80 p-4 rounded-xl border border-slate-800/80 flex flex-col justify-between space-y-3">
           <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
             <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
@@ -116,7 +109,6 @@ export default function TaskAnalyticsChart({ tasks }: TaskAnalyticsChartProps) {
             <span className="text-[10px] font-mono text-slate-400">{totalTasks} Total</span>
           </div>
 
-          {/* Metrics List */}
           <div className="space-y-2.5 py-1">
             {priorityData.map((item) => (
               <div key={item.name} className="flex items-center justify-between text-xs">

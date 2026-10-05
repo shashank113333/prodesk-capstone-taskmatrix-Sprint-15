@@ -15,7 +15,6 @@ export default function RbacDeleteModal({ isOpen, onClose, userRole }: RbacDelet
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
       <div className="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-5 relative animate-in fade-in zoom-in duration-200">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2.5 bg-amber-500/10 text-amber-500 rounded-xl border border-amber-500/20">
@@ -34,7 +33,6 @@ export default function RbacDeleteModal({ isOpen, onClose, userRole }: RbacDelet
           </button>
         </div>
 
-        {/* Notice Body */}
         <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
           <p className="text-xs font-semibold text-amber-400 leading-relaxed">
             "RBAC Restriction: Task deletion requires Scrum Lead or Admin authorization"
@@ -44,7 +42,6 @@ export default function RbacDeleteModal({ isOpen, onClose, userRole }: RbacDelet
           </p>
         </div>
 
-        {/* Action Button */}
         <div className="flex items-center justify-end pt-1">
           <button
             onClick={onClose}

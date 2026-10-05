@@ -11,7 +11,7 @@ export interface RegisteredUser extends UserPayload {
   password?: string;
   registeredAt?: string;
   status?: 'active' | 'suspended' | 'banned';
-  suspendedUntil?: string | null; // ISO string date or 'PERMANENT'
+  suspendedUntil?: string | null;
   suspensionReason?: string;
 }
 
@@ -29,7 +29,6 @@ interface AuthState {
   hydrateAuth: () => void;
   clearError: () => void;
 
-  // Admin Master Controls (RBAC User Management)
   deleteUserAccount: (email: string) => void;
   suspendUserAccount: (email: string, duration: '1h' | '24h' | '7d' | '30d' | 'permanent', reason?: string) => void;
   reactivateUserAccount: (email: string) => void;
@@ -57,7 +56,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   clearError: () => set({ loginError: null }),
 
-  // STRICT LOGIN Handler with Suspension & Restriction Check
   login: (email: string, password = '', role = 'Developer') => {
     if (typeof window === 'undefined') return false;
 
@@ -77,7 +75,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const cleanEmail = email.trim().toLowerCase();
     const cleanPassword = password.trim();
 
-    // 1. Check if Email exists
     const existingUser = registeredList.find(
       (u) => u.email.trim().toLowerCase() === cleanEmail
     );
@@ -92,7 +89,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return false;
     }
 
-    // 2. Strict Password Check
     const userStoredPassword = existingUser.password || 'password123';
     if (userStoredPassword !== cleanPassword) {
       set({
@@ -104,7 +100,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return false;
     }
 
-    // 3. Strict Role-Based Check
     if (existingUser.role && existingUser.role !== role) {
       set({
         loginError: `Role Mismatch! Your account is registered as "${existingUser.role}". Please select "${existingUser.role}" to sign in.`,
@@ -115,7 +110,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return false;
     }
 
-    // 4. ADMIN USER SUSPENSION / BAN CHECK!
     if (existingUser.status === 'suspended' || existingUser.status === 'banned') {
       if (existingUser.suspendedUntil === 'PERMANENT') {
         set({
@@ -136,7 +130,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           });
           return false;
         } else {
-          // Suspension Expired - Auto Reactivate
           existingUser.status = 'active';
           existingUser.suspendedUntil = null;
           localStorage.setItem('taskmatrix_registered_users', JSON.stringify(registeredList));
@@ -166,7 +159,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     return true;
   },
 
-  // REGISTER Handler
   register: (name: string, email: string, password = '', role: 'Developer' | 'Project Lead' | 'Admin' = 'Developer') => {
     const cleanEmail = email.trim().toLowerCase();
     const cleanPassword = password.trim();
@@ -225,7 +217,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     return true;
   },
 
-  // RESET PASSWORD Handler
   resetPassword: (email: string, newPassword = '') => {
     if (typeof window === 'undefined') return { success: false, error: 'Browser missing' };
 
@@ -255,7 +246,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     return { success: true };
   },
 
-  // ADMIN ACTION: Delete User Account
   deleteUserAccount: (email: string) => {
     const list = get().registeredUsers.filter((u) => u.email.toLowerCase() !== email.toLowerCase());
     if (typeof window !== 'undefined') {
@@ -264,7 +254,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ registeredUsers: list });
   },
 
-  // ADMIN ACTION: Suspend / Restrict User Account
   suspendUserAccount: (email: string, duration: '1h' | '24h' | '7d' | '30d' | 'permanent', reason = 'Admin Policy Enforcement') => {
     const now = Date.now();
     let until: string | null = 'PERMANENT';
@@ -293,7 +282,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ registeredUsers: updated });
   },
 
-  // ADMIN ACTION: Reactivate User Account
   reactivateUserAccount: (email: string) => {
     const updated = get().registeredUsers.map((u) => {
       if (u.email.toLowerCase() === email.toLowerCase()) {
@@ -313,7 +301,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ registeredUsers: updated });
   },
 
-  // ADMIN ACTION: Update User Role
   updateUserRole: (email: string, newRole: 'Developer' | 'Project Lead' | 'Admin') => {
     const updated = get().registeredUsers.map((u) => {
       if (u.email.toLowerCase() === email.toLowerCase()) {
@@ -328,7 +315,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ registeredUsers: updated });
   },
 
-  // LOGOUT Handler
   logout: () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('taskmatrix_user');
@@ -342,7 +328,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     });
   },
 
-  // HYDRATE AUTH Handler
   hydrateAuth: () => {
     if (typeof window !== 'undefined') {
       const savedUser = localStorage.getItem('taskmatrix_user');
