@@ -46,6 +46,11 @@ export default function UserAccountsModal({ isOpen, onClose }: UserAccountsModal
   };
 
   const handleDelete = (email: string) => {
+    if (email.toLowerCase() === "admin@prodesk.io") {
+      showNotice("Protection Security Guard: Primary Master Admin account (admin@prodesk.io) cannot be deleted!");
+      setConfirmDeleteEmail(null);
+      return;
+    }
     if (currentUser?.email.toLowerCase() === email.toLowerCase()) {
       showNotice("Restriction: You cannot delete your own logged-in Admin account!");
       setConfirmDeleteEmail(null);
@@ -57,6 +62,11 @@ export default function UserAccountsModal({ isOpen, onClose }: UserAccountsModal
   };
 
   const handleSuspend = (email: string, duration: '1h' | '24h' | '7d' | '30d' | 'permanent') => {
+    if (email.toLowerCase() === "admin@prodesk.io") {
+      showNotice("Protection Security Guard: Primary Master Admin account (admin@prodesk.io) cannot be suspended!");
+      setSuspendMenuUserEmail(null);
+      return;
+    }
     if (currentUser?.email.toLowerCase() === email.toLowerCase()) {
       showNotice("Restriction: You cannot suspend your own logged-in Admin account!");
       setSuspendMenuUserEmail(null);
@@ -78,6 +88,10 @@ export default function UserAccountsModal({ isOpen, onClose }: UserAccountsModal
   };
 
   const handleRoleChange = (email: string, newRole: 'Developer' | 'Project Lead' | 'Admin') => {
+    if (email.toLowerCase() === "admin@prodesk.io") {
+      showNotice("Protection Security Guard: Primary Master Admin role (admin@prodesk.io) is locked!");
+      return;
+    }
     if (currentUser?.email.toLowerCase() === email.toLowerCase()) {
       showNotice("Restriction: You cannot alter your own active Admin role here!");
       return;

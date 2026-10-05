@@ -45,6 +45,15 @@ const defaultRegisteredUsers: RegisteredUser[] = [
     registeredAt: '2026-09-28',
     status: 'active',
   },
+  {
+    uid: 'usr_admin_master',
+    name: 'System Administrator',
+    email: 'admin@prodesk.io',
+    role: 'Admin',
+    password: 'adminpassword123',
+    registeredAt: '2026-09-28',
+    status: 'active',
+  },
 ];
 
 export const useAuthStore = create<AuthState>((set, get) => ({
