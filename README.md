@@ -24,7 +24,6 @@ Below are the pre-seeded credentials for evaluators and reviewers to test all RB
 | Role Name | Agile Designation | Email Address | Default Password | Permissions / Capabilities |
 | :--- | :--- | :--- | :--- | :--- |
 | **System Administrator** | Master System Admin | `shashankv@gmail.com` | `1234` | **Full Admin Control**: All BaaS CRUD, Task Deletions, Recharts Analytics, Accounts DB Directory, Timed Account Suspensions (1h/24h/7d/30d/Perm), Role Editor |
-| **Frontend Specialist** | Individual Contributor | `developer@prodesk.io` | `password123` | **Developer Access**: Create Tasks, Read Backlog, Edit Tasks, Update Status (To Do ➔ Done). *Delete & Accounts DB restricted* |
 
 ---
 
