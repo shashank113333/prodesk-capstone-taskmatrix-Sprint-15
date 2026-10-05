@@ -38,7 +38,7 @@ interface AuthState {
 const defaultRegisteredUsers: RegisteredUser[] = [
   {
     uid: 'usr_dev_default',
-    name: 'Shashank',
+    name: 'Shashank Vishwakarma',
     email: 'developer@prodesk.io',
     role: 'Developer',
     password: 'password123',
@@ -47,10 +47,10 @@ const defaultRegisteredUsers: RegisteredUser[] = [
   },
   {
     uid: 'usr_admin_master',
-    name: 'System Administrator',
-    email: 'admin@prodesk.io',
+    name: 'Shashank Vishwakarma',
+    email: 'shashankv@gmail.com',
     role: 'Admin',
-    password: 'adminpassword123',
+    password: '1234',
     registeredAt: '2026-09-28',
     status: 'active',
   },
